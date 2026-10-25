@@ -1,0 +1,70 @@
+﻿<Window x:Class="XRay.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:XRay.App.ViewModels"
+        xmlns:views="clr-namespace:XRay.App.Views"
+        Title="X-RAY" Width="1360" Height="860" MinWidth="1100" MinHeight="700"
+        WindowStartupLocation="CenterScreen" Icon="Assets/xray.ico"
+        Background="{DynamicResource Bg.Window}" FontFamily="{StaticResource Font.Ui}"
+        TextOptions.TextFormattingMode="Display" UseLayoutRounding="True"
+        AutomationProperties.Name="X-RAY">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:OverviewViewModel}"><views:OverviewView /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DiskAnalyzerViewModel}"><views:DiskAnalyzerView /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:PerformanceViewModel}"><views:PerformanceView /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:LargeFilesViewModel}"><views:LargeFilesView /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DuplicatesViewModel}"><views:DuplicatesView /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:HistoryViewModel}"><views:HistoryView /></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}"><views:SettingsView /></DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="216" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Background="{DynamicResource Bg.Sidebar}" BorderBrush="{DynamicResource Border.Subtle}" BorderThickness="0,0,1,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" Margin="22,20,0,22">
+                    <Image Source="Assets/xray-256.png" Width="28" Height="28" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="X-RAY" FontFamily="{StaticResource Font.Display}" FontSize="17" FontWeight="Bold"
+                                   Foreground="{DynamicResource Text.Primary}" />
+                        <TextBlock Text="PC diagnostics" FontSize="10.5" Foreground="{DynamicResource Text.Tertiary}" Margin="0,-1,0,0" />
+                    </StackPanel>
+                </StackPanel>
+
+                <ListBox Grid.Row="1" ItemsSource="{Binding Pages}" SelectedItem="{Binding CurrentPage}"
+                         ItemContainerStyle="{StaticResource NavItem}" AutomationProperties.Name="Navigation"
+                         KeyboardNavigation.TabNavigation="Once">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" AutomationProperties.Name="{Binding Title}">
+                                <TextBlock Text="{Binding Glyph}" Style="{StaticResource Icon}" FontSize="15" Width="20" />
+                                <TextBlock Text="{Binding Title}" Margin="12,0,0,0" FontSize="13.5" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <StackPanel Grid.Row="2" Margin="22,0,16,18">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="6" Height="6" Fill="{DynamicResource Status.Good}" VerticalAlignment="Center" />
+                        <TextBlock Text="Local only · no telemetry" Margin="8,0,0,0" FontSize="11" Foreground="{DynamicResource Text.Tertiary}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding Version}" FontSize="11" Foreground="{DynamicResource Text.Tertiary}" Margin="14,4,0,0" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Page -->
+        <ContentControl Grid.Column="1" Content="{Binding CurrentPage}" Focusable="False" />
+    </Grid>
+</Window>

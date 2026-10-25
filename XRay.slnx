@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/XRay.App/XRay.App.csproj" />
+    <Project Path="src/XRay.Core/XRay.Core.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/XRay.Core.Tests/XRay.Core.Tests.csproj" />
+  </Folder>
+</Solution>

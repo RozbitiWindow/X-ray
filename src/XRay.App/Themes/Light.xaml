@@ -1,0 +1,43 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="C.Window">#FFF3F4F6</Color>
+    <Color x:Key="C.Sidebar">#FFEAECEF</Color>
+    <SolidColorBrush x:Key="Bg.Window" Color="#FFF3F4F6" />
+    <SolidColorBrush x:Key="Bg.Sidebar" Color="#FFEAECEF" />
+    <SolidColorBrush x:Key="Bg.Surface" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Bg.SurfaceRaised" Color="#FFF7F8FA" />
+    <SolidColorBrush x:Key="Bg.Input" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Bg.Hover" Color="#FFE4E7EB" />
+    <SolidColorBrush x:Key="Bg.Pressed" Color="#FFD9DDE2" />
+    <SolidColorBrush x:Key="Bg.Track" Color="#FFE1E4E8" />
+    <SolidColorBrush x:Key="Bg.Treemap" Color="#FF1A1D22" />
+
+    <SolidColorBrush x:Key="Border.Subtle" Color="#FFE2E5E9" />
+    <SolidColorBrush x:Key="Border.Default" Color="#FFD0D5DB" />
+    <SolidColorBrush x:Key="Border.Strong" Color="#FFAAB2BD" />
+
+    <SolidColorBrush x:Key="Text.Primary" Color="#FF1A1D22" />
+    <SolidColorBrush x:Key="Text.Secondary" Color="#FF545C68" />
+    <SolidColorBrush x:Key="Text.Tertiary" Color="#FF7C8591" />
+    <SolidColorBrush x:Key="Text.Disabled" Color="#FFA9B0BA" />
+
+    <Color x:Key="C.Accent">#FF0A8FB0</Color>
+    <SolidColorBrush x:Key="Accent" Color="#FF0A8FB0" />
+    <SolidColorBrush x:Key="Accent.Hover" Color="#FF0B9FC4" />
+    <SolidColorBrush x:Key="Accent.Pressed" Color="#FF087A97" />
+    <SolidColorBrush x:Key="Accent.Subtle" Color="#1A0A8FB0" />
+    <SolidColorBrush x:Key="Accent.SubtleHover" Color="#2A0A8FB0" />
+    <SolidColorBrush x:Key="Accent.Foreground" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Accent.Text" Color="#FF087A97" />
+    <SolidColorBrush x:Key="Chart.Fill" Color="#220A8FB0" />
+    <SolidColorBrush x:Key="Chart.Grid" Color="#FFE6E8EC" />
+    <SolidColorBrush x:Key="Chart.Secondary" Color="#FF7B52D6" />
+    <SolidColorBrush x:Key="Chart.SecondaryFill" Color="#187B52D6" />
+
+    <SolidColorBrush x:Key="Status.Good" Color="#FF1F8A5B" />
+    <SolidColorBrush x:Key="Status.Warn" Color="#FFB97A0E" />
+    <SolidColorBrush x:Key="Status.Bad" Color="#FFC93A32" />
+    <SolidColorBrush x:Key="Status.GoodSubtle" Color="#1F1F8A5B" />
+    <SolidColorBrush x:Key="Status.WarnSubtle" Color="#1FB97A0E" />
+    <SolidColorBrush x:Key="Status.BadSubtle" Color="#1FC93A32" />
+</ResourceDictionary>

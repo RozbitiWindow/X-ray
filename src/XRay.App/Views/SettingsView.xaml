@@ -1,0 +1,197 @@
+<UserControl x:Class="XRay.App.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:XRay.App.ViewModels"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance vm:SettingsViewModel}">
+    <UserControl.Resources>
+        <Style x:Key="SettingRow" TargetType="Grid">
+            <Setter Property="Margin" Value="0,0,0,18" />
+        </Style>
+        <Style x:Key="SettingLabel" TargetType="TextBlock" BasedOn="{StaticResource Text.Base}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="SettingHint" TargetType="TextBlock" BasedOn="{StaticResource Text.Caption}">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,3,24,0" />
+        </Style>
+    </UserControl.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="{StaticResource Pad.Page}" MaxWidth="900" HorizontalAlignment="Left">
+            <TextBlock Text="Settings" Style="{StaticResource Text.Title}" />
+            <TextBlock Text="Changes apply immediately and are stored locally." Style="{StaticResource Text.Muted}" Margin="0,4,0,20" />
+
+            <!-- Appearance -->
+            <TextBlock Text="APPEARANCE" Style="{StaticResource Text.Section}" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,20" Padding="20,18,20,2">
+                <StackPanel>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Theme" Style="{StaticResource SettingLabel}" />
+                            <TextBlock Text="Colour scheme of the interface. The treemap keeps a dark canvas in both themes for contrast." Style="{StaticResource SettingHint}" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding Themes}" SelectedItem="{Binding SelectedTheme}" DisplayMemberPath="Label" VerticalAlignment="Top" />
+                    </Grid>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Size units" Style="{StaticResource SettingLabel}" />
+                            <TextBlock Text="How byte counts are shown everywhere in the app." Style="{StaticResource SettingHint}" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding UnitChoices}" SelectedItem="{Binding Units}" DisplayMemberPath="Label" VerticalAlignment="Top" />
+                    </Grid>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Size metric" Style="{StaticResource SettingLabel}" />
+                            <TextBlock Text="Logical size is the file length. Size on disk is estimated from the cluster size and reflects compression and sparse files." Style="{StaticResource SettingHint}" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding MetricChoices}" SelectedItem="{Binding Metric}" DisplayMemberPath="Label" VerticalAlignment="Top" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Disk analyzer -->
+            <TextBlock Text="DISK ANALYZER" Style="{StaticResource Text.Section}" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,20" Padding="20,18,20,2">
+                <StackPanel>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Default scan location" Style="{StaticResource SettingLabel}" />
+                            <TextBlock Text="Pre-filled when you open the Disk Analyzer, Large Files and History. Empty uses your user folder. Nothing is scanned automatically." Style="{StaticResource SettingHint}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBox Text="{Binding DefaultScanPath, UpdateSourceTrigger=LostFocus}" FontFamily="{StaticResource Font.Mono}" FontSize="12" />
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <Button Content="Browse…" Command="{Binding BrowseDefaultPathCommand}" />
+                                <Button Content="Clear" Style="{StaticResource Button.Ghost}" Margin="6,0,0,0" Command="{Binding ClearDefaultPathCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Treemap nesting" Style="{StaticResource SettingLabel}" />
+                            <TextBlock Text="How many folder levels are drawn inside each other. Deeper nesting shows more detail at once." Style="{StaticResource SettingHint}" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding DepthChoices}" SelectedItem="{Binding TreemapDepth}" DisplayMemberPath="Label" VerticalAlignment="Top" />
+                    </Grid>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Treemap labels" Style="{StaticResource SettingLabel}" />
+                            <TextBlock Text="Show names and sizes on tiles that are large enough." Style="{StaticResource SettingHint}" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding ShowLabels}" Content="Show labels" VerticalAlignment="Top" />
+                    </Grid>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Tile shading" Style="{StaticResource SettingLabel}" />
+                            <TextBlock Text="A subtle vertical gradient that helps separate neighbouring tiles." Style="{StaticResource SettingHint}" />
+                        </StackPanel>
+                        <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding Shading}" Content="Shade tiles" VerticalAlignment="Top" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Monitoring & history -->
+            <TextBlock Text="MONITORING AND HISTORY" Style="{StaticResource Text.Section}" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,20" Padding="20,18,20,2">
+                <StackPanel>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Polling interval" Style="{StaticResource SettingLabel}" />
+                            <TextBlock Text="How often CPU, memory, GPU and disk metrics are sampled. Longer intervals use less CPU." Style="{StaticResource SettingHint}" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding PollingChoices}" SelectedItem="{Binding PollingInterval}" DisplayMemberPath="Label" VerticalAlignment="Top" />
+                    </Grid>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Snapshot depth" Style="{StaticResource SettingLabel}" />
+                            <TextBlock Text="Folder levels recorded in each new snapshot. Deeper snapshots are larger but allow finer comparisons." Style="{StaticResource SettingHint}" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding SnapshotDepthChoices}" SelectedItem="{Binding SnapshotDepth}" DisplayMemberPath="Label" VerticalAlignment="Top" />
+                    </Grid>
+                    <Grid Style="{StaticResource SettingRow}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="300" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="History retention" Style="{StaticResource SettingLabel}" />
+                            <TextBlock Text="Older snapshots are removed when X-RAY starts. Only X-RAY's own records are affected." Style="{StaticResource SettingHint}" />
+                        </StackPanel>
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding RetentionChoices}" SelectedItem="{Binding Retention}" DisplayMemberPath="Label" VerticalAlignment="Top" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Startup -->
+            <TextBlock Text="STARTUP" Style="{StaticResource Text.Section}" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,20" Padding="20,18,20,2">
+                <Grid Style="{StaticResource SettingRow}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="300" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Start with Windows" Style="{StaticResource SettingLabel}" />
+                        <TextBlock Text="Adds X-RAY to your personal sign-in startup list (no administrator rights needed). Off by default; X-RAY never enables it on its own."
+                                   Style="{StaticResource SettingHint}" />
+                        <TextBlock Text="{Binding StartupMessage}" Style="{StaticResource SettingHint}" Foreground="{DynamicResource Accent.Text}"
+                                   Visibility="{Binding StartupMessage, Converter={StaticResource NotEmptyToVis}}" />
+                    </StackPanel>
+                    <CheckBox Grid.Column="1" Style="{StaticResource Toggle}" IsChecked="{Binding StartWithWindows}" Content="Launch at sign-in" VerticalAlignment="Top" />
+                </Grid>
+            </Border>
+
+            <!-- Privacy & data -->
+            <TextBlock Text="PRIVACY AND DATA" Style="{StaticResource Text.Section}" />
+            <Border Style="{StaticResource Card}" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Text.Muted}" TextWrapping="Wrap" LineHeight="19"
+                               Text="X-RAY works entirely offline. It collects no telemetry and sends nothing over the network. File contents are never read - only names, sizes, dates and attributes. Settings, snapshots and logs are stored here:" />
+                    <TextBox Text="{Binding DataFolder, Mode=OneWay}" IsReadOnly="True" Margin="0,10,0,0" FontFamily="{StaticResource Font.Mono}" FontSize="12" />
+                    <WrapPanel Margin="0,10,0,0">
+                        <Button Content="Open data folder" Command="{Binding OpenDataFolderCommand}" Margin="0,0,8,0" />
+                        <Button Content="Open log folder" Command="{Binding OpenLogFolderCommand}" Margin="0,0,8,0" />
+                        <Button Content="Reset to defaults…" Style="{StaticResource Button.Ghost}" Command="{Binding ResetDefaultsCommand}" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

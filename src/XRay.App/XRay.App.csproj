@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>XRay</AssemblyName>
+    <RootNamespace>XRay.App</RootNamespace>
+    <Product>X-RAY</Product>
+    <AssemblyTitle>X-RAY</AssemblyTitle>
+    <Description>Local Windows PC diagnostics and storage analyzer.</Description>
+    <Version>1.0.0</Version>
+    <ApplicationIcon>Assets\xray.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.14" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- WPF projects omit System.IO from implicit usings to avoid Path/Shapes ambiguity; it is safe here. -->
+    <Using Include="System.IO" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\XRay.Core\XRay.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\xray.ico" />
+    <Resource Include="Assets\xray-256.png" />
+  </ItemGroup>
+
+</Project>

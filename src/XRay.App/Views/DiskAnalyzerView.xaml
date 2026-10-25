@@ -1,0 +1,498 @@
+<UserControl x:Class="XRay.App.Views.DiskAnalyzerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:controls="clr-namespace:XRay.App.Controls"
+             xmlns:vm="clr-namespace:XRay.App.ViewModels"
+             mc:Ignorable="d" d:DataContext="{d:DesignInstance vm:DiskAnalyzerViewModel}"
+             d:DesignWidth="1200" d:DesignHeight="800">
+    <UserControl.InputBindings>
+        <KeyBinding Key="Back" Command="{Binding NavigateUpCommand}" />
+        <KeyBinding Key="Up" Modifiers="Alt" Command="{Binding NavigateUpCommand}" />
+        <KeyBinding Key="F5" Command="{Binding RescanCommand}" />
+    </UserControl.InputBindings>
+
+    <Grid Margin="{StaticResource Pad.Page}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock Text="Disk Analyzer" Style="{StaticResource Text.Title}" />
+            <TextBlock Margin="0,4,0,0" Style="{StaticResource Text.Muted}"
+                       Text="Scan a folder or drive to see what takes up space. Nothing is ever modified or deleted." />
+        </StackPanel>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Padding="10" Margin="0,0,0,14">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid>
+                    <TextBox x:Name="PathBox" Text="{Binding ScanPath, UpdateSourceTrigger=PropertyChanged}" Padding="34,6,9,6"
+                             FontFamily="{StaticResource Font.Mono}" FontSize="12.5"
+                             AutomationProperties.Name="Folder to scan" IsEnabled="{Binding IsScanning, Converter={StaticResource InverseBool}}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Enter" Command="{Binding ScanCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <TextBlock Text="&#xE8B7;" Style="{StaticResource Icon.Plain}" FontSize="14" Margin="11,0,0,0"
+                               HorizontalAlignment="Left" IsHitTestVisible="False" />
+                </Grid>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="8,0,0,0">
+                    <Button Command="{Binding BrowseCommand}" ToolTip="Choose a folder" AutomationProperties.Name="Browse"
+                            IsEnabled="{Binding IsScanning, Converter={StaticResource InverseBool}}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE838;" Style="{StaticResource Icon}" FontSize="14" Margin="0,0,8,0" />
+                            <TextBlock Text="Browse…" />
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="8,0,0,0" Style="{StaticResource Button.Primary}" Command="{Binding ScanCommand}"
+                            Visibility="{Binding IsScanning, Converter={StaticResource BoolToVisInverted}}" AutomationProperties.Name="Scan">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE721;" Style="{StaticResource Icon}" FontSize="14" Margin="0,0,8,0" />
+                            <TextBlock Text="Scan" />
+                        </StackPanel>
+                    </Button>
+                    <Button Margin="8,0,0,0" Style="{StaticResource Button.Danger}" Command="{Binding CancelCommand}"
+                            Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}" AutomationProperties.Name="Cancel scan">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE711;" Style="{StaticResource Icon}" FontSize="13" Margin="0,0,8,0" />
+                            <TextBlock Text="Cancel" />
+                        </StackPanel>
+                    </Button>
+                    <Rectangle Width="1" Margin="10,4" Fill="{DynamicResource Border.Default}" />
+                    <Button Style="{StaticResource Button.Icon}" Content="&#xE72C;" Command="{Binding RescanCommand}"
+                            ToolTip="Rescan (F5)" AutomationProperties.Name="Rescan" />
+                    <Button Style="{StaticResource Button.Icon}" Content="&#xE74E;" Command="{Binding SaveSnapshotCommand}"
+                            ToolTip="Save a snapshot of this scan for the History page" AutomationProperties.Name="Save snapshot" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Scanning -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" VerticalAlignment="Top" Padding="24,22"
+                Visibility="{Binding IsScanning, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+                <TextBlock Text="Scanning…" Style="{StaticResource Text.Subtitle}" Margin="0,0,0,4" />
+                <TextBlock Style="{StaticResource Text.Caption}" Margin="0,0,0,18" TextWrapping="Wrap"
+                           Text="The app stays responsive while scanning. Links and junctions are not followed. Unreadable folders are recorded, never treated as empty." />
+                <ContentControl Content="{Binding Progress}" Focusable="False" />
+            </StackPanel>
+        </Border>
+
+        <!-- Welcome / empty state -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" VerticalAlignment="Top" Padding="28"
+                Visibility="{Binding ShowWelcome, Converter={StaticResource BoolToVis}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Width="56" Height="56" CornerRadius="12" Background="{DynamicResource Accent.Subtle}" VerticalAlignment="Top">
+                    <TextBlock Text="&#xEDA2;" Style="{StaticResource Icon.Plain}" FontSize="26" Foreground="{DynamicResource Accent.Text}"
+                               HorizontalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" Margin="20,0,0,0">
+                    <TextBlock Text="No folder scanned yet" Style="{StaticResource Text.Subtitle}" />
+                    <TextBlock Margin="0,6,0,0" Style="{StaticResource Text.Muted}" TextWrapping="Wrap" MaxWidth="640" HorizontalAlignment="Left"
+                               Text="Choose a folder or a whole drive and press Scan. X-RAY reads only file names and sizes - never file contents - and builds an interactive map of where the space goes." />
+                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                        <Button Style="{StaticResource Button.Primary}" Command="{Binding BrowseCommand}" Content="Choose folder…" />
+                        <Button Margin="8,0,0,0" Command="{Binding ScanCommand}" Content="Scan the folder above" />
+                    </StackPanel>
+                    <StackPanel Margin="0,22,0,0" Visibility="{Binding RecentFolders, Converter={StaticResource NotEmptyToVis}}">
+                        <TextBlock Text="RECENT FOLDERS" Style="{StaticResource Text.Section}" />
+                        <ItemsControl ItemsSource="{Binding RecentFolders}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource Button.Ghost}" HorizontalAlignment="Left" Padding="6,4"
+                                            Command="{Binding DataContext.ScanRecentCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE81C;" Style="{StaticResource Icon}" FontSize="12" Margin="0,0,8,0" />
+                                            <TextBlock Text="{Binding}" FontFamily="{StaticResource Font.Mono}" FontSize="12" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Results -->
+        <Grid Grid.Row="2" Visibility="{Binding ShowResults, Converter={StaticResource BoolToVis}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Breadcrumbs + summary -->
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Button Style="{StaticResource Button.Icon}" Content="&#xE74A;" Command="{Binding NavigateUpCommand}"
+                        ToolTip="Up one level (Backspace)" AutomationProperties.Name="Up one level" />
+                <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="4,0,12,0">
+                    <ItemsControl ItemsSource="{Binding Breadcrumbs}" VerticalAlignment="Center">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock x:Name="Sep" Text="&#xE76C;" Style="{StaticResource Icon.Plain}" FontSize="10" Margin="2,0"
+                                               Foreground="{DynamicResource Text.Tertiary}" />
+                                    <Button x:Name="Crumb" Style="{StaticResource Button.Crumb}" Content="{Binding Name}"
+                                            Command="{Binding DataContext.NavigateToCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}" ToolTip="{Binding FullPath}" />
+                                </StackPanel>
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding Parent}" Value="{x:Null}">
+                                        <Setter TargetName="Sep" Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <TextBlock Grid.Column="2" Text="{Binding SummaryText}" Style="{StaticResource Text.Caption}" VerticalAlignment="Center"
+                           TextTrimming="CharacterEllipsis" MaxWidth="560" />
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="420" MinWidth="320" MaxWidth="720" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" MinWidth="320" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: list + details -->
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" MinHeight="160" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Border Style="{StaticResource Card}" Padding="10,10,6,6">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid Margin="0,0,4,8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource SegmentHost}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <RadioButton Style="{StaticResource Segment}" Content="Contents" GroupName="ListMode" IsChecked="{Binding ShowContents}" />
+                                        <RadioButton Style="{StaticResource Segment}" Content="Largest files" GroupName="ListMode" IsChecked="{Binding ShowLargestFiles}" />
+                                    </StackPanel>
+                                </Border>
+                                <TextBlock Grid.Column="1" Text="{Binding ItemCountText}" Style="{StaticResource Text.Caption}"
+                                           HorizontalAlignment="Right" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="8,0,0,0" />
+                            </Grid>
+                            <Grid Grid.Row="1" Margin="0,0,4,6" Visibility="{Binding ShowContents, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Sort" Style="{StaticResource Text.Caption}" VerticalAlignment="Center" Margin="2,0,8,0" />
+                                <Border Grid.Column="1" Style="{StaticResource SegmentHost}" HorizontalAlignment="Left">
+                                    <StackPanel Orientation="Horizontal">
+                                        <RadioButton Style="{StaticResource Segment}" Padding="9,4" Content="Size" GroupName="Sort" IsChecked="{Binding SortBySize}" />
+                                        <RadioButton Style="{StaticResource Segment}" Padding="9,4" Content="Name" GroupName="Sort" IsChecked="{Binding SortByName}" />
+                                        <RadioButton Style="{StaticResource Segment}" Padding="9,4" Content="Files" GroupName="Sort" IsChecked="{Binding SortByFiles}" />
+                                        <RadioButton Style="{StaticResource Segment}" Padding="9,4" Content="Modified" GroupName="Sort" IsChecked="{Binding SortByModified}" />
+                                    </StackPanel>
+                                </Border>
+                                <Button Grid.Column="2" Style="{StaticResource Button.Icon}" Width="28" Height="28" FontSize="12"
+                                        Command="{Binding ToggleSortDirectionCommand}" ToolTip="Reverse sort order" AutomationProperties.Name="Reverse sort order">
+                                    <Button.Content>
+                                        <TextBlock FontFamily="{StaticResource Font.Icons}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="&#xE74B;" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding SortDescending}" Value="False">
+                                                            <Setter Property="Text" Value="&#xE74A;" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Button.Content>
+                                </Button>
+                            </Grid>
+
+                            <DataGrid x:Name="ItemsGrid" Grid.Row="2" ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedRow}"
+                                      MouseDoubleClick="OnRowDoubleClick" KeyDown="OnGridKeyDown" AutomationProperties.Name="Folder contents">
+                                <DataGrid.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Open folder" Command="{Binding OpenRowCommand}" CommandParameter="{Binding SelectedRow}">
+                                            <MenuItem.Icon><TextBlock Text="&#xE8B7;" Style="{StaticResource Icon.Plain}" FontSize="13" /></MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="Show in Explorer" Command="{Binding RevealInExplorerCommand}" CommandParameter="{Binding SelectedNode}">
+                                            <MenuItem.Icon><TextBlock Text="&#xE838;" Style="{StaticResource Icon.Plain}" FontSize="13" /></MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}" CommandParameter="{Binding SelectedNode}">
+                                            <MenuItem.Icon><TextBlock Text="&#xE8C8;" Style="{StaticResource Icon.Plain}" FontSize="13" /></MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </DataGrid.ContextMenu>
+                                <DataGrid.Columns>
+                                    <DataGridTemplateColumn Header="NAME" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Grid ToolTip="{Binding Node.FullPath}">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Width="4" Height="18" CornerRadius="2" Background="{Binding Swatch}" Margin="0,0,9,0" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock Text="{Binding Glyph}" Style="{StaticResource Icon.Plain}" FontSize="13" Margin="0,0,7,0" />
+                                                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" Style="{StaticResource Text.Base}" />
+                                                        </StackPanel>
+                                                        <TextBlock Text="{Binding Note}" FontSize="11" Foreground="{DynamicResource Status.Warn}" Margin="20,1,0,0"
+                                                                   Visibility="{Binding HasNote, Converter={StaticResource BoolToVis}}" />
+                                                        <TextBlock Text="{Binding FolderText}" Style="{StaticResource Text.Caption}" FontSize="10.5" Margin="20,1,0,0"
+                                                                   TextTrimming="CharacterEllipsis"
+                                                                   Visibility="{Binding DataContext.ShowLargestFiles, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BoolToVis}}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="SIZE" Width="112">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel>
+                                                    <Grid>
+                                                        <TextBlock Text="{Binding SizeText}" Style="{StaticResource Text.Base}" FontWeight="SemiBold" />
+                                                        <TextBlock Text="{Binding PercentText}" Style="{StaticResource Text.Caption}" HorizontalAlignment="Right" />
+                                                    </Grid>
+                                                    <ContentControl Style="{StaticResource UsageBar}" Tag="{Binding Percent}" Height="3" Margin="0,4,0,0" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="FILES" Width="66" Binding="{Binding FilesText}">
+                                        <DataGridTextColumn.ElementStyle>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource Text.Caption}">
+                                                <Setter Property="HorizontalAlignment" Value="Right" />
+                                            </Style>
+                                        </DataGridTextColumn.ElementStyle>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <TextBlock Grid.Row="2" Text="{Binding EmptyMessage}" Style="{StaticResource Text.Muted}" TextWrapping="Wrap"
+                                       Margin="12,40,12,0" TextAlignment="Center" VerticalAlignment="Top" IsHitTestVisible="False"
+                                       Visibility="{Binding EmptyMessage, Converter={StaticResource NotEmptyToVis}}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Details -->
+                    <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,12,0,0" Padding="16,14">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding DetailName}" Style="{StaticResource Text.Subtitle}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding DetailKind}" Style="{StaticResource Text.Caption}" Margin="0,2,0,0" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                                    <Button Style="{StaticResource Button.Icon}" Content="&#xE838;" Command="{Binding RevealInExplorerCommand}"
+                                            ToolTip="Show in Explorer" AutomationProperties.Name="Show in Explorer" />
+                                    <Button Style="{StaticResource Button.Icon}" Content="&#xE8C8;" Command="{Binding CopyPathCommand}"
+                                            ToolTip="Copy path" AutomationProperties.Name="Copy path" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBox Text="{Binding DetailPath, Mode=OneWay}" IsReadOnly="True" BorderThickness="0" Background="Transparent"
+                                     Padding="0" MinHeight="0" Margin="0,8,0,10" TextWrapping="Wrap" FontFamily="{StaticResource Font.Mono}"
+                                     FontSize="11.5" Foreground="{DynamicResource Text.Secondary}" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.Resources>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource Text.Base}">
+                                        <Setter Property="Margin" Value="0,2" />
+                                        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+                                    </Style>
+                                </Grid.Resources>
+                                <TextBlock Text="Size" Foreground="{DynamicResource Text.Tertiary}" Margin="0,2,16,2" />
+                                <TextBlock Grid.Column="1" Text="{Binding DetailSize}" />
+                                <TextBlock Grid.Row="1" Text="On disk (est.)" Foreground="{DynamicResource Text.Tertiary}" Margin="0,2,16,2" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DetailAllocated}" />
+                                <TextBlock Grid.Row="2" Text="Contents" Foreground="{DynamicResource Text.Tertiary}" Margin="0,2,16,2"
+                                           Visibility="{Binding DetailContents, Converter={StaticResource NotEmptyToVis}}" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding DetailContents}"
+                                           Visibility="{Binding DetailContents, Converter={StaticResource NotEmptyToVis}}" />
+                                <TextBlock Grid.Row="3" Text="Modified" Foreground="{DynamicResource Text.Tertiary}" Margin="0,2,16,2" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding DetailModified}" />
+                                <TextBlock Grid.Row="4" Text="Share" Foreground="{DynamicResource Text.Tertiary}" Margin="0,2,16,2"
+                                           Visibility="{Binding DetailShare, Converter={StaticResource NotEmptyToVis}}" />
+                                <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding DetailShare}"
+                                           Visibility="{Binding DetailShare, Converter={StaticResource NotEmptyToVis}}" />
+                            </Grid>
+                            <Border Style="{StaticResource Callout}" Margin="0,10,0,0" Background="{DynamicResource Status.WarnSubtle}" BorderThickness="0"
+                                    Visibility="{Binding HasDetailWarning, Converter={StaticResource BoolToVis}}">
+                                <TextBlock Text="{Binding DetailWarning}" TextWrapping="Wrap" Style="{StaticResource Text.Caption}" Foreground="{DynamicResource Text.Primary}" />
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <GridSplitter Grid.Column="1" Width="12" HorizontalAlignment="Center" VerticalAlignment="Stretch" ResizeBehavior="PreviousAndNext"
+                              Focusable="False" />
+
+                <!-- Right: treemap -->
+                <Border Grid.Column="2" Style="{StaticResource Card}" Padding="0" ClipToBounds="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Border CornerRadius="8,8,0,0" ClipToBounds="True" Background="{DynamicResource Bg.Treemap}">
+                            <controls:TreemapControl x:Name="Treemap" Root="{Binding CurrentNode}" Metric="{Binding Metric}"
+                                                     MaxDepth="{Binding TreemapDepth}" ShowLabels="{Binding ShowLabels}" Shading="{Binding Shading}"
+                                                     SelectedNode="{Binding SelectedNode}" NavigateCommand="{Binding NavigateToCommand}"
+                                                     Background="{DynamicResource Bg.Treemap}"
+                                                     AutomationProperties.Name="Treemap of the current folder">
+                                <controls:TreemapControl.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Show in Explorer" Command="{Binding RevealInExplorerCommand}" CommandParameter="{Binding SelectedNode}">
+                                            <MenuItem.Icon><TextBlock Text="&#xE838;" Style="{StaticResource Icon.Plain}" FontSize="13" /></MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="Copy path" Command="{Binding CopyPathCommand}" CommandParameter="{Binding SelectedNode}">
+                                            <MenuItem.Icon><TextBlock Text="&#xE8C8;" Style="{StaticResource Icon.Plain}" FontSize="13" /></MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="Up one level" Command="{Binding NavigateUpCommand}">
+                                            <MenuItem.Icon><TextBlock Text="&#xE74A;" Style="{StaticResource Icon.Plain}" FontSize="13" /></MenuItem.Icon>
+                                        </MenuItem>
+                                    </ContextMenu>
+                                </controls:TreemapControl.ContextMenu>
+                            </controls:TreemapControl>
+                        </Border>
+                        <TextBlock Text="{Binding EmptyMessage}" Style="{StaticResource Text.Muted}" Foreground="#FFA4ABB6" TextWrapping="Wrap"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" TextAlignment="Center" MaxWidth="380" IsHitTestVisible="False"
+                                   Visibility="{Binding EmptyMessage, Converter={StaticResource NotEmptyToVis}}" />
+                        <Grid Grid.Row="1" Margin="14,9,14,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ItemsControl ItemsSource="{Binding Legend}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Margin="0,2,12,2">
+                                            <Border Width="9" Height="9" CornerRadius="2" Background="{Binding Brush}" Margin="0,0,5,0" />
+                                            <TextBlock Text="{Binding Name}" Style="{StaticResource Text.Caption}" FontSize="11" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock Grid.Column="1" Style="{StaticResource Text.Caption}" FontSize="11" VerticalAlignment="Top" Margin="12,2,0,0"
+                                       TextAlignment="Right" Foreground="{DynamicResource Text.Tertiary}">
+                                <Run Text="{Binding MetricLabel, Mode=OneWay}" /><LineBreak />
+                                <Run Text="Click a folder to open it · click a file to select it" />
+                            </TextBlock>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Limitations -->
+            <Border Grid.Row="2" Style="{StaticResource Callout}" Margin="0,12,0,0"
+                    Visibility="{Binding LimitationsText, Converter={StaticResource NotEmptyToVis}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="&#xE946;" Style="{StaticResource Icon.Plain}" FontSize="14" VerticalAlignment="Top" Margin="0,1,10,0" />
+                    <TextBlock Grid.Column="1" Text="{Binding LimitationsText}" Style="{StaticResource Text.Caption}" TextWrapping="Wrap" LineHeight="17" />
+                    <ToggleButton x:Name="IssuesToggle" Grid.Column="2" VerticalAlignment="Top" Margin="12,0,0,0" Cursor="Hand"
+                                  Visibility="{Binding IssueSamples, Converter={StaticResource NotEmptyToVis}}">
+                        <ToggleButton.Template>
+                            <ControlTemplate TargetType="ToggleButton">
+                                <TextBlock x:Name="T" Text="Show unreadable items" Foreground="{DynamicResource Accent.Text}" FontSize="12" />
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter TargetName="T" Property="Text" Value="Hide list" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </ToggleButton.Template>
+                    </ToggleButton>
+                    <ListBox Grid.Row="1" Grid.ColumnSpan="3" ItemsSource="{Binding IssueSamples}" MaxHeight="160" Margin="0,8,0,0"
+                             Visibility="{Binding IsChecked, ElementName=IssuesToggle, Converter={StaticResource BoolToVis}}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="110" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="{Binding Kind}" Style="{StaticResource Text.Caption}" Foreground="{DynamicResource Status.Warn}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Path}" Style="{StaticResource Text.Mono}" FontSize="11.5"
+                                               TextTrimming="CharacterEllipsis" ToolTip="{Binding Message}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Status message -->
+        <Border Grid.Row="3" Style="{StaticResource Callout}" Margin="0,12,0,0" HorizontalAlignment="Left"
+                Visibility="{Binding StatusMessage, Converter={StaticResource NotEmptyToVis}}">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="&#xE73E;" Style="{StaticResource Icon.Plain}" FontSize="13" Foreground="{DynamicResource Accent.Text}" Margin="0,0,8,0" />
+                <TextBlock Text="{Binding StatusMessage}" Style="{StaticResource Text.Caption}" Foreground="{DynamicResource Text.Primary}" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
